@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/coalaura/arguments"
+	"github.com/coalaura/binary"
 )
 
 func pack() {
@@ -17,8 +18,8 @@ func pack() {
 	info("Collecting files...")
 
 	var (
-		files       []File
-		directories []File
+		files       []FileHeader
+		directories []DirectoryHeader
 	)
 
 	paths, err := filepath.Glob(in)
@@ -42,12 +43,12 @@ func pack() {
 		size := uint64(inf.Size())
 
 		if inf.IsDir() {
-			directories = append(directories, File{
+			directories = append(directories, DirectoryHeader{
 				Path:  path,
 				Perms: parms,
 			})
 		} else {
-			files = append(files, File{
+			files = append(files, FileHeader{
 				Path:  path,
 				Perms: parms,
 				Size:  size,
@@ -63,7 +64,7 @@ func pack() {
 
 	info("Using %d threads", threads)
 
-	jobs := make(chan File, threads)
+	jobs := make(chan FileHeader, threads)
 	results := make(chan []byte, threads)
 
 	var (
@@ -82,6 +83,15 @@ func pack() {
 	}
 
 	info("Processing directories...")
+
+	// Write amount of directories (4 bytes)
+	count := uint32(len(directories))
+
+	err = binary.Write(buffer, binary.LittleEndian, count)
+	if err != nil {
+		fatalf(5, "failed to write directory count: %v", err)
+	}
+
 	for _, directory := range directories {
 		err = WriteDirectoryHeader(buffer, directory)
 		if err != nil {

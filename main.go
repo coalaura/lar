@@ -6,12 +6,6 @@ import (
 
 var verbose bool
 
-type File struct {
-	Path  string
-	Perms uint16
-	Size  uint64
-}
-
 func init() {
 	arguments.Parse()
 }

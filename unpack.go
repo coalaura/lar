@@ -1,13 +1,12 @@
 package main
 
 import (
-	"encoding/binary"
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/coalaura/arguments"
+	"github.com/coalaura/binary"
 )
 
 func unpack() {
@@ -42,96 +41,64 @@ func unpack() {
 		fatalf(4, "input is not a valid LAR file")
 	}
 
-	// The a list of directories and files
 	var (
-		typ   [1]byte
-		perms uint16
-		size  uint64
-
-		chunk   [1]byte
-		builder strings.Builder
-		path    string
-
+		directories uint32
 		files       int
-		directories int
 	)
 
 	info("Unpacking...")
 
+	// Read the number of directories
+	err = binary.Read(in, binary.LittleEndian, &directories)
+	if err != nil {
+		fatalf(5, "failed to read number of directories: %v", err)
+	}
+
+	// Read directories
+	var directory DirectoryHeader
+
+	for i := uint32(0); i < directories; i++ {
+		err = binary.Read(in, binary.LittleEndian, &directory)
+		if err != nil {
+			fatalf(5, "failed to read directory header: %v", err)
+		}
+
+		_, err := os.Stat(directory.Path)
+		if err != nil {
+			err = os.MkdirAll(directory.Path, os.FileMode(directory.Perms))
+			if err != nil {
+				fatalf(6, "failed to create directory: %v", err)
+			}
+		}
+	}
+
+	// Then read all the files
+	var (
+		file FileHeader
+		data []byte
+	)
+
 	for {
-		// Read the type (1=directory, 2=file)
-		_, err = in.Read(typ[:])
+		err = binary.Read(in, binary.LittleEndian, &file)
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			fatalf(5, "failed to read file header: %v", err)
+		}
+
+		data = make([]byte, file.Size)
+
+		_, err = io.ReadFull(in, data)
 		if err != nil {
-			if err == io.EOF {
-				break
-			}
-
-			fatalf(5, "failed to read file-type: %v", err)
+			fatalf(5, "failed to read file data: %v", err)
 		}
 
-		// Read the path (terminated by a null byte)
-		builder.Reset()
-
-		for {
-			_, err = in.Read(chunk[:])
-			if err != nil {
-				fatalf(5, "failed to read path: %v", err)
-			}
-
-			if chunk[0] == 0 {
-				break
-			}
-
-			builder.WriteByte(chunk[0])
-		}
-
-		path = filepath.Join(out, builder.String())
-
-		info("Unpacking %s...", path)
-
-		// Read the permissions
-		err = binary.Read(in, binary.LittleEndian, &perms)
+		err = os.WriteFile(filepath.Join(out, file.Path), data, os.FileMode(file.Perms))
 		if err != nil {
-			fatalf(5, "failed to read permissions: %v", err)
+			fatalf(6, "failed to write file: %v", err)
 		}
 
-		// If its a directory, we create it (if it doesn't exist)
-		if typ[0] == 1 {
-			_, err := os.Stat(path)
-			if err != nil {
-				err = os.MkdirAll(path, os.FileMode(perms))
-				if err != nil {
-					fatalf(6, "failed to create directory: %v", err)
-				}
-			}
-
-			directories++
-		} else if typ[0] == 2 {
-			// If its a file, we first read its size
-			err = binary.Read(in, binary.LittleEndian, &size)
-			if err != nil {
-				fatalf(5, "failed to read size: %v", err)
-			}
-
-			// Then we create the file
-			file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.FileMode(perms))
-			if err != nil {
-				fatalf(6, "failed to create file: %v", err)
-			}
-
-			// Then we copy the data
-			_, err = io.CopyN(file, in, int64(size))
-			if err != nil {
-				fatalf(6, "failed to copy data: %v", err)
-			}
-
-			err = file.Close()
-			if err != nil {
-				fatalf(6, "failed to close file: %v", err)
-			}
-
-			files++
-		}
+		files++
 	}
 
 	info("Unpacked %d files and %d directories", files, directories)

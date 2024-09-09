@@ -1,2 +1,4 @@
 github.com/coalaura/arguments v1.4.1 h1:ytF8PyQimIIK+ZHNF0DiCji02+8ZjTW6O5lAQMbZXPY=
 github.com/coalaura/arguments v1.4.1/go.mod h1:zDouRoTD/s8bwinfmfrOf9PE4qxwxyQ5Hoz8Ctd8cBk=
+github.com/coalaura/binary v1.0.1 h1:W/eJIB0uATNJQUY8iUa4XMVnEHy+LZIG38SCsc9wlac=
+github.com/coalaura/binary v1.0.1/go.mod h1:E8+5a6pDBSbQ5mf+bR/Ix63KFytTxcR5rWZBR0gHEdc=

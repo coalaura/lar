@@ -12,7 +12,7 @@ import (
 )
 
 func pack() {
-	in := arguments.GetNamedAs("i", "input", "*")
+	in := arguments.String("i", "input", "*")
 
 	info("Collecting files...")
 
@@ -26,7 +26,7 @@ func pack() {
 		fatalf(1, "failed to glob: %v", err)
 	}
 
-	out, err := arguments.NamedFile("o", "output", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644, os.Stdout)
+	out, err := arguments.File("o", "output", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644, os.Stdout)
 	if err != nil {
 		fatalf(2, "failed to open output: %v", err)
 	}
@@ -59,7 +59,7 @@ func pack() {
 
 	info("Found %d files, %d directories", len(files), len(directories))
 
-	threads := arguments.GetNamedAs("t", "threads", runtime.NumCPU())
+	threads := arguments.IntN("t", "threads", runtime.NumCPU())
 
 	info("Using %d threads", threads)
 

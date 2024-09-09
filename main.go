@@ -19,9 +19,9 @@ func init() {
 func main() {
 	help()
 
-	verbose = arguments.GetNamedAs("v", "verbose", false)
+	verbose = arguments.Bool("v", "verbose", false)
 
-	if arguments.GetNamedAs("u", "unpack", false) {
+	if arguments.Bool("u", "unpack", false) {
 		unpack()
 	} else {
 		pack()

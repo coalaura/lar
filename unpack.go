@@ -11,12 +11,12 @@ import (
 )
 
 func unpack() {
-	in, err := arguments.NamedFile("i", "input", os.O_RDONLY, 0, os.Stdin)
+	in, err := arguments.File("i", "input", os.O_RDONLY, 0, os.Stdin)
 	if err != nil {
 		fatalf(1, "failed to open input: %v", err)
 	}
 
-	out := arguments.GetNamedAs("o", "output", ".")
+	out := arguments.String("o", "output", ".")
 
 	inf, err := os.Stat(out)
 	if os.IsNotExist(err) {

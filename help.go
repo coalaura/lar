@@ -7,7 +7,7 @@ import (
 )
 
 func help() {
-	if !arguments.GetNamedAs("h", "help", false) {
+	if !arguments.Bool("h", "help", false) {
 		return
 	}
 

@@ -1,4 +1,2 @@
-github.com/coalaura/arguments v1.2.2 h1:4eYLhAzpKKkQdcUXmDnKArfXVuNkPESZYZIBCxI7R6M=
-github.com/coalaura/arguments v1.2.2/go.mod h1:h+xgqnaqg9Du0WIclJFAFEaW66UrIebuQPEK78P+ekI=
-golang.org/x/exp v0.0.0-20240904232852-e7e105dedf7e h1:I88y4caeGeuDQxgdoFPUq097j7kNfw6uvuiNxUBfcBk=
-golang.org/x/exp v0.0.0-20240904232852-e7e105dedf7e/go.mod h1:akd2r19cwCdwSwWeIdzYQGa/EZZyqcOdwWiwj5L5eKQ=
+github.com/coalaura/arguments v1.4.1 h1:ytF8PyQimIIK+ZHNF0DiCji02+8ZjTW6O5lAQMbZXPY=
+github.com/coalaura/arguments v1.4.1/go.mod h1:zDouRoTD/s8bwinfmfrOf9PE4qxwxyQ5Hoz8Ctd8cBk=
